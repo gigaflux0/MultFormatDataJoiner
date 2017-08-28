@@ -6,8 +6,10 @@ import java.util.regex.Pattern;
 
 import com.Ostermiller.util.CSVParser;
 import com.Ostermiller.util.LabeledCSVParser;
-
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.StringReader;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -34,7 +36,8 @@ public class MultFormatDataJoiner {
 					} catch (IOException e) {e.printStackTrace();}	
 				}
 				else if (m.group(1).equals("json")) {
-					System.out.println("oh aye2");
+					Gson g = new Gson();
+					add(g, path);
 				}
 				else {
 					System.out.println("oh aye3");
@@ -62,11 +65,17 @@ public class MultFormatDataJoiner {
 				e.printStackTrace();
 			}
 		}
-/*		
-		private void add(//JSON) {
-			//
-		}
 		
+		private void add(Gson g, String path) {
+			try {
+				String jsonFile = new String(Files.readAllBytes(Paths.get(path)));
+				Type listType = new TypeToken<LinkedList<Data>>(){}.getType();
+				@SuppressWarnings("unchecked")
+				List<Data> proData = (LinkedList<Data>) g.fromJson(jsonFile, listType);
+				dataList.addAll(proData);
+			} catch (IOException e) {e.printStackTrace();}
+		}
+/*		
 		private void add(//XML) {
 			//
 		}
@@ -83,26 +92,26 @@ public class MultFormatDataJoiner {
 		}
 		
 		private class Data {
-			private int id;		
-			private String firstName;			
-			private String lastName;			
+			private int user_id;		
+			private String first_name;			
+			private String last_name;			
 			private String username;
-			private String type;
-			private String lastLoginTime;
+			private String user_type;
+			private String last_login_time;
 			
 			Data(String id, String firstName, String lastName, 
 					String username, String type, String lastLoginTime) {
-				this.id = Integer.parseInt(id);
-				this.firstName = firstName;
-				this.lastName = lastName;
+				this.user_id = Integer.parseInt(id);
+				this.first_name = firstName;
+				this.last_name = lastName;
 				this.username = username;
-				this.type = type;
-				this.lastLoginTime = lastLoginTime;
+				this.user_type = type;
+				this.last_login_time = lastLoginTime;
 			}
 			
 			public String toString() {
-				return (Integer.toString(id)+"   "+firstName+"   "+lastName+
-						"   "+username+"   "+type+"   "+lastLoginTime);
+				return (Integer.toString(user_id)+"   "+first_name+"   "+last_name+
+						"   "+username+"   "+user_type+"   "+last_login_time);
 			}
 		}
 	}
