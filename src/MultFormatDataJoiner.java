@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -20,8 +21,10 @@ import com.Ostermiller.util.CSVParser;
 import com.Ostermiller.util.CSVPrinter;
 import com.Ostermiller.util.LabeledCSVParser;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.io.StringReader;
+import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -131,13 +134,13 @@ public class MultFormatDataJoiner {
 		
 		public void write(String path) {
 			//Nesting writer methods in inner class to keep code clean
-			new Writer(path);
+			new DataWriter(path);
 		}
 		
-		private class Writer {
+		private class DataWriter {
 			private String path;
 			
-			Writer(String path) {
+			DataWriter(String path) {
 				this.path = path;
 				writeCsv();
 				writeJson();
@@ -162,7 +165,13 @@ public class MultFormatDataJoiner {
 			}
 			
 			private void writeJson() {
-				//
+				try {
+					PrintWriter writer = new PrintWriter(path+"/users.json", "UTF-8");
+					Gson g = new GsonBuilder().setPrettyPrinting().create();
+			        String json = g.toJson(dataList);
+		            writer.write(json);
+		            writer.close();
+				} catch(Exception e){e.printStackTrace();}
 			}
 			
 			private void writeXML() {
