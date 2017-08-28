@@ -1,5 +1,4 @@
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -29,14 +28,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import java.io.StringReader;
-import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class MultFormatDataJoiner {
 	
-	private static class DataCompiler {
+	public static class DataCompiler {
 		private List<Data> dataList;
 		private boolean autosort;
 		
@@ -233,6 +231,15 @@ public class MultFormatDataJoiner {
 			for(Data data : dataList) {
 				System.out.println(data);
 			}
+		}
+		
+		public String toString() {
+			String string = "";
+			for(Data data : dataList) {
+				string = string.concat(data.toString())+"\n";
+			}
+			string = string.trim();
+			return string;
 		}
 		
 		private class Data {
