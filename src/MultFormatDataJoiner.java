@@ -11,6 +11,11 @@ import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -133,7 +138,7 @@ public class MultFormatDataJoiner {
 		}
 		
 		public void write(String path) {
-			//Nesting writer methods in inner class to keep code clean
+			//Nesting writer methods in inner DataWriter class to keep code clean
 			new DataWriter(path);
 		}
 		
@@ -145,6 +150,7 @@ public class MultFormatDataJoiner {
 				writeCsv();
 				writeJson();
 				writeXML();
+				System.out.println("Compiled data written to "+path+" folder.");
 			}
 			
 			private void writeCsv() {
@@ -168,14 +174,58 @@ public class MultFormatDataJoiner {
 				try {
 					PrintWriter writer = new PrintWriter(path+"/users.json", "UTF-8");
 					Gson g = new GsonBuilder().setPrettyPrinting().create();
-			        String json = g.toJson(dataList);
-		            writer.write(json);
+		            writer.write(g.toJson(dataList));
 		            writer.close();
 				} catch(Exception e){e.printStackTrace();}
 			}
 			
 			private void writeXML() {
-				//
+				try {
+				    DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+				    DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+				    Document doc = docBuilder.newDocument();
+				    
+				    Element rootElement = doc.createElement("users");
+				    doc.appendChild(rootElement);
+				    
+				    for(Data data : dataList) {
+				    	Element base = doc.createElement("user");
+				    	
+				    	Element id = doc.createElement("userid");
+					    id.appendChild(doc.createTextNode(Integer.toString(data.getId())));
+					    base.appendChild(id);
+					    
+					    Element fName = doc.createElement("firstname");
+					    fName.appendChild(doc.createTextNode(data.getFirstName()));
+					    base.appendChild(fName);
+					    
+					    Element sName = doc.createElement("surname");
+					    sName.appendChild(doc.createTextNode(data.getLastName()));
+					    base.appendChild(sName);
+					    
+					    Element userName = doc.createElement("username");
+					    userName.appendChild(doc.createTextNode(data.getUsername()));
+					    base.appendChild(userName);
+					    
+					    Element type = doc.createElement("type");
+					    type.appendChild(doc.createTextNode(data.getUserType()));
+					    base.appendChild(type);
+					    
+					    Element lastLog = doc.createElement("lastlogintime");
+					    lastLog.appendChild(doc.createTextNode(data.getLastLoginTime()));
+					    base.appendChild(lastLog);
+				    	
+					    rootElement.appendChild(base);
+				    }
+				    
+				    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+				    Transformer transformer = transformerFactory.newTransformer();
+				    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+				    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+				    DOMSource source = new DOMSource(doc);
+				    StreamResult result = new StreamResult(new File(path+"/users.xml"));
+				    transformer.transform(source, result);
+				} catch (Exception e) {e.printStackTrace();}
 			}
 		}
 		
@@ -248,8 +298,8 @@ public class MultFormatDataJoiner {
 		//not needed if autoSort is enabled
 		data.sort();
 		
-		//prints compiled data to console
-		data.printDataList();
+		//prints compiled data to console	
+		//data.printDataList();
 		
 		//folder name for output data
 		data.write("Result");
